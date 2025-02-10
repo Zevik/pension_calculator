@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <title>מחשבון פנסיה להטבות מס לעצמאים - 2025</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      direction: rtl;
+      padding: 20px;
+      max-width: 700px;
+      margin: auto;
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    .result {
+      background: #f1f1f1;
+      padding: 15px;
+      margin-top: 20px;
+    }
+    h1, h2, h3 {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>מחשבון פנסיה להטבות מס לעצמאים - 2025</h1>
+  <form id="calcForm">
+    <label for="income">הכנס את ההכנסה השנתית שלך (בש"ח):</label><br>
+    <input type="number" id="income" name="income" required step="0.01"><br>
+    <button type="submit">חשב</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    // נתונים קבועים לשנת 2025:
+    const averageMonthlyWage = 13316.0;      // שכר ממוצע במשק (בש"ח)
+    const capMultiplier = 2.5;                // תקרה: 2.5 פעמים השכר הממוצע
+    const assumedTaxRate = 0.35;              // הנחה: מס שולי 35%
+    const creditRate = 0.35;                  // שיעור הזיכוי על חלק ההפקדה (35%)
+    const annualIncomeCap = averageMonthlyWage * capMultiplier * 12; // תקרת הכנסה מזכה (לדוגמה: 13,316 * 2.5 * 12 = 399,480 ש"ח)
+    const depositRate = 0.165;                // אחוז הפקדה מקסימלית המזכה בהטבות (16.5%)
+    
+    function calculatePensionBenefits(userAnnualIncome) {
+      // ההכנסה המזכה היא המינימום בין ההכנסה שלך לבין תקרת ההכנסה המזכה
+      let qualifyingIncome = Math.min(userAnnualIncome, annualIncomeCap);
+      
+      // חישובים:
+      let maxQualifiedDeposit = qualifyingIncome * depositRate;
+      let deductionPart = qualifyingIncome * 0.11;  // ניכוי מס - 11%
+      let creditPart    = qualifyingIncome * 0.055; // זיכוי מס - 5.5%
+      
+      // חיסכון במס:
+      let deductionSaving = deductionPart * assumedTaxRate;
+      let creditSaving = creditPart * creditRate;
+      let totalTaxSaving = deductionSaving + creditSaving;
+      
+      return {
+        qualifyingIncome,
+        annualIncomeCap,
+        maxQualifiedDeposit,
+        deductionPart,
+        deductionSaving,
+        creditPart,
+        creditSaving,
+        totalTaxSaving
+      };
+    }
+    
+    document.getElementById('calcForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      // קריאה לקלט מהמשתמש
+      let userIncome = parseFloat(document.getElementById('income').value);
+      
+      // חישוב ההטבות
+      let results = calculatePensionBenefits(userIncome);
+      
+      // בניית הפלט עם הסברים
+      let output = "";
+      output += `<p><strong>הכנסה שנתית שהוזנה:</strong> ${userIncome.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      output += `<p><strong>תקרת הכנסה שנתית המזכה בהטבות מס:</strong> ${annualIncomeCap.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      if (userIncome > annualIncomeCap) {
+        output += `<p style="color:red;">הערה: ההכנסה שלך עולה על תקרת ההטבות, ולכן ההכנסה המזכה היא ${annualIncomeCap.toLocaleString('he-IL')} ש"ח</p>`;
+      }
+      output += `<p><strong>הכנסה מזכה (min(הכנסה, תקרה)):</strong> ${results.qualifyingIncome.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      output += `<p><strong>הפקדה מקסימלית המזכה בהטבות מס (16.5% מההכנסה המזכה):</strong> ${results.maxQualifiedDeposit.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      output += `<h3>פירוט הטבות המס:</h3>`;
+      output += `<p>ניכוי מס (11%): ${results.deductionPart.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח → חיסכון מוערך (בהנחה של מס שולי 35%): ${results.deductionSaving.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      output += `<p>זיכוי מס (5.5%): ${results.creditPart.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח → זיכוי ישיר מוערך (35%): ${results.creditSaving.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</p>`;
+      output += `<h3>סה"כ חיסכון צפוי במס: ${results.totalTaxSaving.toLocaleString('he-IL', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ש"ח</h3>`;
+      
+      document.getElementById('result').innerHTML = output;
+    });
+  </script>
+</body>
+</html>
